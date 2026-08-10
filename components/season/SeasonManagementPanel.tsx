@@ -27,6 +27,7 @@ export function SeasonManagementPanel() {
   const [current, setCurrent] = useState<Season | null>(null);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [seasonNumber, setSeasonNumber] = useState('6');
+  const [leagueCode, setLeagueCode] = useState<string>('APL');
   const [busy, setBusy] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [sourceSeasonId, setSourceSeasonId] = useState('');
@@ -185,10 +186,10 @@ export function SeasonManagementPanel() {
     try {
       const json = await authFetch('/api/admin/seasons/start', {
         method: 'POST',
-        body: JSON.stringify({ season_number: number, league_code: activeLeagueConfig.code }),
+        body: JSON.stringify({ season_number: number, league_code: leagueCode }),
       });
 
-      toast(`${activeLeagueConfig.shortName} ${number} started.`);
+      toast(`${leagueCode} ${number} started.`);
       setCurrent((json.season || null) as Season | null);
       await load();
     } catch (error) {
@@ -331,13 +332,23 @@ export function SeasonManagementPanel() {
               disabled={hasActiveSeason || busy}
             />
 
+            <select
+              className="input flex-1"
+              value={leagueCode}
+              onChange={(e) => setLeagueCode(e.target.value)}
+              disabled={hasActiveSeason || busy}
+            >
+              <option value="APL">APL</option>
+              <option value="FCS">FCS</option>
+            </select>
+
             <button
               type="button"
               onClick={() => void startSeason()}
               disabled={hasActiveSeason || busy}
               className="btn-primary justify-center disabled:cursor-not-allowed disabled:opacity-45"
             >
-              START SEASON {activeLeagueConfig.shortName} {seasonNumber || '?'}
+              START SEASON {leagueCode} {seasonNumber || '?'}
             </button>
           </div>
         </div>
