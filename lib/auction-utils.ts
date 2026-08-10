@@ -2,7 +2,11 @@ import { HIGH_BID_INCREMENT, LOW_BID_INCREMENT, MAX_BOUGHT_PLAYERS_PER_TEAM } fr
 import type { Player, Team } from '@/lib/types';
 
 export function nextBidAmount(currentAmount: number) {
-  return currentAmount < 1000 ? currentAmount + LOW_BID_INCREMENT : currentAmount + HIGH_BID_INCREMENT;
+  if (currentAmount >= 30000) return currentAmount + 5000;
+  if (currentAmount >= 20000) return currentAmount + 4000;
+  if (currentAmount >= 10000) return currentAmount + 2000;
+  if (currentAmount >= 1000) return currentAmount + HIGH_BID_INCREMENT;
+  return currentAmount + LOW_BID_INCREMENT;
 }
 
 export function normalizePhoneNumber(phone: string) {
