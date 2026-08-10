@@ -28,6 +28,7 @@ export type Season = {
   status: SeasonStatus;
   started_at: string;
   ended_at?: string | null;
+  use_secret_sequence?: boolean | null;
   created_at: string;
 };
 
