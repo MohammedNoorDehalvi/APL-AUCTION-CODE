@@ -4,9 +4,17 @@ import { getActiveSeason } from '@/lib/season-server';
 import { createSupabaseAdmin } from '@/lib/supabase/admin';
 import { getLeagueConfig } from '@/lib/league-config';
 
+export const dynamic = 'force-dynamic';
+
 export default async function PlayerRegistrationPage() {
-  const supabase = createSupabaseAdmin();
-  const season = await getActiveSeason(supabase).catch(() => null);
+  let season = null;
+  try {
+    const supabase = createSupabaseAdmin();
+    season = await getActiveSeason(supabase);
+  } catch (e) {
+    // Ignore error during static build
+  }
+  
   const leagueConfig = getLeagueConfig(season?.league_code);
 
   return (

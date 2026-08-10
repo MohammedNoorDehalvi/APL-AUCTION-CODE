@@ -8,8 +8,14 @@ import { createSupabaseAdmin } from '@/lib/supabase/admin';
 import { getLeagueConfig } from '@/lib/league-config';
 
 export default async function HomePage() {
-  const supabase = createSupabaseAdmin();
-  const season = await getActiveSeason(supabase).catch(() => null);
+  let season = null;
+  try {
+    const supabase = createSupabaseAdmin();
+    season = await getActiveSeason(supabase);
+  } catch (e) {
+    // Ignore error during static generation or if env vars are missing
+  }
+  
   const leagueConfig = getLeagueConfig(season?.league_code);
   const isAnimatedBackground = leagueConfig.backgroundMode === 'animated';
 

@@ -1,4 +1,4 @@
-import { LeagueCode } from './types';
+import type { LeagueCode } from './types';
 
 export interface LeagueConfig {
   code: LeagueCode;
