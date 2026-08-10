@@ -1,0 +1,107 @@
+import type { Metadata, Viewport } from 'next';
+import { Suspense } from 'react';
+import { Inter, Outfit, Playfair_Display } from 'next/font/google';
+import './globals.css';
+import { Navbar } from '@/components/layout/Navbar';
+import { Footer } from '@/components/layout/Footer';
+import { AppToaster } from '@/components/ui/AppToaster';
+import { ConfirmDialogHost } from '@/components/ui/ConfirmDialog';
+import { SeasonPublicGate } from '@/components/season/SeasonPublicGate';
+import { SplineIntroOverlay } from '@/components/ui/SplineIntroOverlay';
+import { FloatingDock } from '@/components/ui/FloatingDock';
+import { GlassFilter } from '@/components/ui/liquid-glass';
+import { SmoothScrollProvider } from '@/components/providers/SmoothScrollProvider';
+import { SkipToContent } from '@/components/ui/SkipToContent';
+import { getActiveSeason } from '@/lib/season-server';
+import { createSupabaseAdmin } from '@/lib/supabase/admin';
+import { getLeagueConfig } from '@/lib/league-config';
+import { FCSBackground } from '@/components/ui/FCSBackground';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-outfit',
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800'],
+});
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-playfair',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+  style: ['normal', 'italic'],
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  let leagueConfig = getLeagueConfig('APL');
+  try {
+    const supabase = createSupabaseAdmin();
+    const season = await getActiveSeason(supabase);
+    if (season?.league_code) {
+      leagueConfig = getLeagueConfig(season.league_code);
+    }
+  } catch (e) {
+    // Ignore, default to APL
+  }
+
+  return {
+    title: `${leagueConfig.copyPrefixes.marketing} | ${leagueConfig.brandName} — Live Digital Cricket Auction`,
+    description: `Enter the ${leagueConfig.brandName} live digital cricket auction. Real-time bidding, protected budgets, and the drama of building a championship squad — all in one arena.`,
+    keywords: [leagueConfig.shortName, leagueConfig.brandName, 'cricket auction', 'live auction', 'digital auction', 'IPL style auction'],
+    openGraph: {
+      title: `${leagueConfig.copyPrefixes.marketing} | ${leagueConfig.brandName}`,
+      description: 'The next name called could change the whole season. Enter the live digital cricket auction.',
+      type: 'website',
+    },
+  };
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#030712',
+};
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  let isAnimatedBackground = true;
+  let heroAsset = '';
+  try {
+    const supabase = createSupabaseAdmin();
+    const season = await getActiveSeason(supabase);
+    const leagueConfig = getLeagueConfig(season?.league_code);
+    isAnimatedBackground = leagueConfig.backgroundMode === 'animated';
+    heroAsset = leagueConfig.heroBackgroundAsset || '';
+  } catch (e) {
+    // Ignore error, fallback to default animated
+  }
+
+  return (
+    <html lang="en" className={`${inter.variable} ${outfit.variable} ${playfair.variable}`}>
+      <body>
+        <SkipToContent />
+        <GlassFilter />
+        {isAnimatedBackground ? <SplineIntroOverlay /> : <FCSBackground heroAsset={heroAsset} />}
+        <Navbar />
+        <SmoothScrollProvider>
+          <div className="app-shell">
+            <main id="main-content" tabIndex={-1} className="outline-none">
+              <SeasonPublicGate>{children}</SeasonPublicGate>
+            </main>
+          </div>
+        </SmoothScrollProvider>
+        <Footer />
+        <Suspense fallback={null}>
+          <FloatingDock />
+        </Suspense>
+        <AppToaster />
+        <ConfirmDialogHost />
+      </body>
+    </html>
+  );
+}
