@@ -42,15 +42,20 @@ export async function POST(request: Request) {
 
   const name = seasonName(parsed.data.league_code, parsed.data.season_number);
 
-  const { data: existingEndedSeason } = await supabase
+  const { data: existingSeason, error: existingSeasonError } = await supabase
     .from('seasons')
-    .select('*')
+    .select('id, name, status, league_code, season_number')
+    .eq('league_code', parsed.data.league_code)
     .eq('season_number', parsed.data.season_number)
     .maybeSingle();
 
-  if (existingEndedSeason?.status === 'ended') {
+  if (existingSeasonError) {
+    return NextResponse.json({ error: existingSeasonError.message }, { status: 500, headers: NO_STORE_HEADERS });
+  }
+
+  if (existingSeason) {
     return NextResponse.json(
-      { error: `${name} already exists as an old season. Use a new season number.` },
+      { error: `${existingSeason.name} already exists. Use a new season number for ${parsed.data.league_code}.` },
       { status: 400, headers: NO_STORE_HEADERS },
     );
   }
