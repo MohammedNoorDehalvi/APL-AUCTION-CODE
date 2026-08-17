@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, CheckSquare, History, Import, Play, RefreshCw, Square } from 'lucide-react';
 
 import { readSession } from '@/hooks/useSession';
-import type { Captain, Player, Season, Team } from '@/lib/types';
+import type { Captain, LeagueCode, Player, Season, Team } from '@/lib/types';
 import { toast } from '@/components/ui/AppToaster';
 import { confirmAction } from '@/components/ui/ConfirmDialog';
 import { getLeagueConfig } from '@/lib/league-config';
@@ -27,7 +27,7 @@ export function SeasonManagementPanel() {
   const [current, setCurrent] = useState<Season | null>(null);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [seasonNumber, setSeasonNumber] = useState('6');
-  const [leagueCode, setLeagueCode] = useState<string>('APL');
+  const [leagueCode, setLeagueCode] = useState<LeagueCode>('APL');
   const [busy, setBusy] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [sourceSeasonId, setSourceSeasonId] = useState('');
@@ -335,11 +335,12 @@ export function SeasonManagementPanel() {
             <select
               className="input flex-1"
               value={leagueCode}
-              onChange={(e) => setLeagueCode(e.target.value)}
+              onChange={(e) => setLeagueCode(e.target.value as LeagueCode)}
               disabled={hasActiveSeason || busy}
             >
-              <option value="APL">APL</option>
-              <option value="FCS">FCS</option>
+              <option value="APL">APL — Ashoka Premier League</option>
+              <option value="FCS">FCS — Fortune Cup Seasons</option>
+              <option value="BPL">BPL — Brothers Premier League</option>
             </select>
 
             <button

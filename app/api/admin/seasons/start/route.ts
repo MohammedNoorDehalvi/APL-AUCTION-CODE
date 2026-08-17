@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { createAuctionEvent, requireAdminRequest } from '@/lib/auction-server';
 import { getActiveSeason, seasonName } from '@/lib/season-server';
+import { SUPPORTED_LEAGUE_CODES } from '@/lib/league-config';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -16,7 +17,7 @@ const NO_STORE_HEADERS = {
 
 const schema = z.object({
   season_number: z.coerce.number().int().min(1).max(100),
-  league_code: z.enum(['APL', 'FCS']).default('APL'),
+  league_code: z.enum(SUPPORTED_LEAGUE_CODES).default('APL'),
 });
 
 export async function POST(request: Request) {
