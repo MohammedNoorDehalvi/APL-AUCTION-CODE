@@ -140,13 +140,22 @@ export function AdminPanel() {
           });
         return next;
       });
-      if (!manual.player_id && json.players?.length) {
-        const firstUnsold = json.players.find(
-          (player) => player.auction_status === 'UNSOLD' || player.status === 'Unsold',
-        );
-        if (firstUnsold) setManual((old) => ({ ...old, player_id: firstUnsold.id }));
-      }
-      if (!manual.team_id && json.teams?.length) setManual((old) => ({ ...old, team_id: json.teams[0].id }));
+      setManual((old) => {
+        let next = old;
+
+        if (!old.player_id && json.players?.length) {
+          const firstUnsold = json.players.find(
+            (player) => player.auction_status === 'UNSOLD' || player.status === 'Unsold',
+          );
+          if (firstUnsold) next = { ...next, player_id: firstUnsold.id };
+        }
+
+        if (!old.team_id && json.teams?.length) {
+          next = { ...next, team_id: json.teams[0].id };
+        }
+
+        return next;
+      });
     } catch (err) {
       if (!silent) toast.error(err instanceof Error ? err.message : 'Failed to load admin data');
     } finally {
@@ -951,7 +960,11 @@ export function AdminPanel() {
       <ReportCard title="Manual Team Fixes" icon={<UserPlus className="h-5 w-5 text-apl-gold" />}>
         <p className="mb-4 text-sm text-white/50">Assign unsold player, remove player from team, or edit sold price.</p>
         <div className="grid gap-3 md:grid-cols-[1fr_1fr_140px_auto]">
-          <select className={selectClass} value={manual.player_id} onChange={(event) => setManual({ ...manual, player_id: event.target.value })}>
+          <select
+            className={selectClass}
+            value={manual.player_id}
+            onChange={(event) => setManual((old) => ({ ...old, player_id: event.target.value }))}
+          >
             <option value="">Choose unsold/available player</option>
             {[...unsoldPlayers, ...approvedPending].map((player) => (
               <option key={player.id} value={player.id}>
@@ -959,7 +972,11 @@ export function AdminPanel() {
               </option>
             ))}
           </select>
-          <select className={selectClass} value={manual.team_id} onChange={(event) => setManual({ ...manual, team_id: event.target.value })}>
+          <select
+            className={selectClass}
+            value={manual.team_id}
+            onChange={(event) => setManual((old) => ({ ...old, team_id: event.target.value }))}
+          >
             <option value="">Choose team</option>
             {data.teams.map((team) => (
               <option key={team.id} value={team.id}>
@@ -967,7 +984,14 @@ export function AdminPanel() {
               </option>
             ))}
           </select>
-          <input className={inputClass} value={manual.price} onChange={(event) => setManual({ ...manual, price: event.target.value })} type="number" min="0" placeholder="Price" />
+          <input
+            className={inputClass}
+            value={manual.price}
+            onChange={(event) => setManual((old) => ({ ...old, price: event.target.value }))}
+            type="number"
+            min="0"
+            placeholder="Price"
+          />
           <button disabled={busy} onClick={() => void manualAssign()} className="btn-primary disabled:opacity-50">
             Assign
           </button>
