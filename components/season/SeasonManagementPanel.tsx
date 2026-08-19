@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, CheckSquare, History, Import, Play, RefreshCw, Square } from 'lucide-react';
 
 import { readSession } from '@/hooks/useSession';
-import type { Captain, LeagueCode, Player, Season, Team } from '@/lib/types';
+import type { Captain, Player, Season, Team } from '@/lib/types';
 import { toast } from '@/components/ui/AppToaster';
 import { confirmAction } from '@/components/ui/ConfirmDialog';
 import { getLeagueConfig } from '@/lib/league-config';
@@ -23,17 +23,11 @@ function isApprovedPlayer(player: Player) {
   return player.approval_status === 'Approved';
 }
 
-function getNextSeasonNumberForLeague(allSeasons: Season[], code: LeagueCode) {
-  const leagueSeasons = allSeasons.filter((s) => (s.league_code || 'APL') === code);
-  const defaultBase = code === 'APL' ? 5 : 0;
-  return leagueSeasons.reduce((max, season) => Math.max(max, Number(season.season_number || 0)), defaultBase) + 1;
-}
-
 export function SeasonManagementPanel() {
   const [current, setCurrent] = useState<Season | null>(null);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [seasonNumber, setSeasonNumber] = useState('6');
-  const [leagueCode, setLeagueCode] = useState<LeagueCode>('APL');
+  const [leagueCode, setLeagueCode] = useState<string>('APL');
   const [busy, setBusy] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [sourceSeasonId, setSourceSeasonId] = useState('');
@@ -93,7 +87,8 @@ export function SeasonManagementPanel() {
       setCurrent(activeSeason);
       setSeasons(allSeasons);
 
-      const nextNumber = getNextSeasonNumberForLeague(allSeasons, leagueCode);
+      const nextNumber =
+        allSeasons.reduce((max, season) => Math.max(max, Number(season.season_number || 0)), 5) + 1;
 
       setSeasonNumber((old) => old || String(nextNumber));
       setLastSync(new Date().toLocaleTimeString());
@@ -340,16 +335,11 @@ export function SeasonManagementPanel() {
             <select
               className="input flex-1"
               value={leagueCode}
-              onChange={(e) => {
-                const nextCode = e.target.value as LeagueCode;
-                setLeagueCode(nextCode);
-                setSeasonNumber(String(getNextSeasonNumberForLeague(seasons, nextCode)));
-              }}
+              onChange={(e) => setLeagueCode(e.target.value)}
               disabled={hasActiveSeason || busy}
             >
-              <option value="APL">APL — Ashoka Premier League</option>
-              <option value="FCS">FCS — Fortune Cup Seasons</option>
-              <option value="BPL">BPL — Brothers Premier League</option>
+              <option value="APL">APL</option>
+              <option value="FCS">FCS</option>
             </select>
 
             <button

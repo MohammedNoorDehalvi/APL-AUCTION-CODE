@@ -1,7 +1,5 @@
 import type { LeagueCode } from './types';
 
-export const SUPPORTED_LEAGUE_CODES = ['APL', 'FCS', 'BPL'] as const;
-
 export interface LeagueConfig {
   code: LeagueCode;
   brandName: string;
@@ -25,7 +23,7 @@ export const LEAGUE_REGISTRY: Record<LeagueCode, LeagueConfig> = {
       marketing: 'APL Digital Auction',
       auction: 'APL Live Auction Room',
     },
-    allowedImportSources: ['APL', 'FCS', 'BPL'],
+    allowedImportSources: ['APL', 'FCS'],
   },
   FCS: {
     code: 'FCS',
@@ -37,25 +35,13 @@ export const LEAGUE_REGISTRY: Record<LeagueCode, LeagueConfig> = {
       marketing: 'FCS Auction',
       auction: 'FCS Live Auction Room',
     },
-    allowedImportSources: ['FCS', 'APL', 'BPL'],
-  },
-  BPL: {
-    code: 'BPL',
-    brandName: 'Brothers Premier League',
-    shortName: 'BPL',
-    backgroundMode: 'stadium',
-    heroBackgroundAsset: 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?q=80&w=2805&auto=format&fit=crop',
-    copyPrefixes: {
-      marketing: 'BPL Digital Auction',
-      auction: 'BPL Live Auction Room',
-    },
-    allowedImportSources: ['BPL', 'APL', 'FCS'],
+    allowedImportSources: ['FCS', 'APL'],
   },
 };
 
-export function getLeagueConfig(code?: string | LeagueCode | null): LeagueConfig {
-  if (!code || !(code in LEAGUE_REGISTRY)) {
+export function getLeagueConfig(code?: LeagueCode | null): LeagueConfig {
+  if (!code || !LEAGUE_REGISTRY[code]) {
     return LEAGUE_REGISTRY['APL']; // Default to APL
   }
-  return LEAGUE_REGISTRY[code as LeagueCode];
+  return LEAGUE_REGISTRY[code];
 }

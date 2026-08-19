@@ -1,9 +1,15 @@
+import { randomInt } from 'crypto';
+
 import { jsonError, requireAdminRequest, selectCurrentPlayer } from '@/lib/auction-server';
 import { getActiveSeason } from '@/lib/season-server';
-import { getNextFixedAuctionPlayer } from '@/lib/server/fixed-auction-order';
 import type { Player } from '@/lib/types';
 
 export const runtime = 'nodejs';
+
+function pickRandomPlayer(players: Player[]) {
+  if (players.length === 0) return null;
+  return players[randomInt(players.length)] ?? null;
+}
 
 export async function POST(request: Request) {
   const { response, supabase } = requireAdminRequest(request);
@@ -31,8 +37,7 @@ export async function POST(request: Request) {
     return jsonError('No approved unsold players are available.');
   }
 
-  const player = getNextFixedAuctionPlayer(players);
-
+  const player = pickRandomPlayer(players);
   if (!player) {
     return jsonError('No approved unsold players are available.');
   }

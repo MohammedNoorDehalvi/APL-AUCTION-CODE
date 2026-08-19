@@ -6,7 +6,7 @@ export type PlayerAuctionStatus = 'PENDING' | 'CURRENT' | 'SOLD' | 'UNSOLD';
 export type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected';
 export type AuctionStatus = 'NOT_STARTED' | 'LIVE' | 'PAUSED' | 'ENDED';
 export type SeasonStatus = 'active' | 'ended';
-export type LeagueCode = 'APL' | 'FCS' | 'BPL';
+export type LeagueCode = 'APL' | 'FCS';
 
 export type AuctionEventType =
   | 'BID'
@@ -28,7 +28,6 @@ export type Season = {
   status: SeasonStatus;
   started_at: string;
   ended_at?: string | null;
-  use_secret_sequence?: boolean | null;
   created_at: string;
 };
 

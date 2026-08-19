@@ -69,36 +69,27 @@ export async function GET(_request: Request, { params }: { params: { seasonId: s
     season = data as SeasonRow | null;
   }
 
-  // Match exact name or "BPL 1" / "bpl1" / "fcs 1" / "apl 7"
+  if (!season) {
+    const num = Number(rawId);
+    if (Number.isFinite(num) && num > 0) {
+      const { data } = await supabase.from('seasons').select('*').eq('season_number', num).maybeSingle();
+      season = data as SeasonRow | null;
+    }
+  }
+
   if (!season && rawId) {
     const { data } = await supabase.from('seasons').select('*').ilike('name', rawId).maybeSingle();
     season = data as SeasonRow | null;
   }
 
+  // e.g. "APL 7" / "apl7"
   if (!season && rawId) {
-    const leagueMatch = rawId.match(/^(apl|fcs|bpl)\s*[-_]?\s*(\d+)$/i);
-    if (leagueMatch) {
-      const league = leagueMatch[1].toUpperCase();
-      const num = Number(leagueMatch[2]);
+    const m = rawId.match(/(\d+)/);
+    if (m) {
       const { data } = await supabase
         .from('seasons')
         .select('*')
-        .eq('league_code', league)
-        .eq('season_number', num)
-        .maybeSingle();
-      season = data as SeasonRow | null;
-    }
-  }
-
-  if (!season) {
-    const num = Number(rawId);
-    if (Number.isFinite(num) && num > 0) {
-      const { data } = await supabase
-        .from('seasons')
-        .select('*')
-        .eq('season_number', num)
-        .order('created_at', { ascending: false })
-        .limit(1)
+        .eq('season_number', Number(m[1]))
         .maybeSingle();
       season = data as SeasonRow | null;
     }

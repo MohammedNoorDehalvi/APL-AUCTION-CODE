@@ -3,7 +3,6 @@ import { z } from 'zod';
 
 import { createAuctionEvent, requireAdminRequest } from '@/lib/auction-server';
 import { getActiveSeason, seasonName } from '@/lib/season-server';
-import { SUPPORTED_LEAGUE_CODES } from '@/lib/league-config';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -17,7 +16,7 @@ const NO_STORE_HEADERS = {
 
 const schema = z.object({
   season_number: z.coerce.number().int().min(1).max(100),
-  league_code: z.enum(SUPPORTED_LEAGUE_CODES).default('APL'),
+  league_code: z.enum(['APL', 'FCS']).default('APL'),
 });
 
 export async function POST(request: Request) {
@@ -42,20 +41,15 @@ export async function POST(request: Request) {
 
   const name = seasonName(parsed.data.league_code, parsed.data.season_number);
 
-  const { data: existingSeason, error: existingSeasonError } = await supabase
+  const { data: existingEndedSeason } = await supabase
     .from('seasons')
-    .select('id, name, status, league_code, season_number')
-    .eq('league_code', parsed.data.league_code)
+    .select('*')
     .eq('season_number', parsed.data.season_number)
     .maybeSingle();
 
-  if (existingSeasonError) {
-    return NextResponse.json({ error: existingSeasonError.message }, { status: 500, headers: NO_STORE_HEADERS });
-  }
-
-  if (existingSeason) {
+  if (existingEndedSeason?.status === 'ended') {
     return NextResponse.json(
-      { error: `${existingSeason.name} already exists. Use a new season number for ${parsed.data.league_code}.` },
+      { error: `${name} already exists as an old season. Use a new season number.` },
       { status: 400, headers: NO_STORE_HEADERS },
     );
   }

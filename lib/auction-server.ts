@@ -6,7 +6,6 @@ import { MAX_BOUGHT_PLAYERS_PER_TEAM } from '@/lib/constants';
 import { nextBidAmount, normalizePhoneNumber } from '@/lib/auction-utils';
 import type { Auction, Captain, Player, Season, Team } from '@/lib/types';
 import { getActiveSeason } from '@/lib/season-server';
-import { getNextFixedAuctionPlayer } from '@/lib/server/fixed-auction-order';
 
 export const AUCTION_ID = 1;
 
@@ -276,7 +275,7 @@ export async function pickRandomPlayer(supabase: SupabaseClient) {
   const players = (data || []) as Player[];
   if (players.length === 0) return null;
 
-  return getNextFixedAuctionPlayer(players);
+  return players[Math.floor(Math.random() * players.length)];
 }
 
 export async function computeNextBidState(

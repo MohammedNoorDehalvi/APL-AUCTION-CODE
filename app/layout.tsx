@@ -15,7 +15,7 @@ import { SkipToContent } from '@/components/ui/SkipToContent';
 import { getActiveSeason } from '@/lib/season-server';
 import { createSupabaseAdmin } from '@/lib/supabase/admin';
 import { getLeagueConfig } from '@/lib/league-config';
-import { StadiumLeagueBackground } from '@/components/ui/StadiumLeagueBackground';
+import { FCSBackground } from '@/components/ui/FCSBackground';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -86,7 +86,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body>
         <SkipToContent />
         <GlassFilter />
-        {isAnimatedBackground ? <SplineIntroOverlay /> : <StadiumLeagueBackground heroAsset={heroAsset} />}
+        {isAnimatedBackground ? <SplineIntroOverlay /> : <FCSBackground heroAsset={heroAsset} />}
         <Navbar />
         <SmoothScrollProvider>
           <div className="app-shell">
